@@ -1,6 +1,12 @@
 FROM debian:jessie
 MAINTAINER Daniel Mendler <mail@daniel-mendler.de>
 
+RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak
+RUN touch /etc/apt/sources.list
+RUN echo 'deb http://mirrors.163.com/debian jessie main non-free contrib' >> /etc/apt/sources.list
+RUN echo 'deb http://mirrors.163.com/debian jessie-proposed-updates main contrib non-free' >> /etc/apt/sources.list
+RUN echo 'deb http://mirrors.163.com/debian-security jessie/updates main contrib non-free' >> /etc/apt/sources.list
+RUN echo 'deb http://security.debian.org jessie/updates main contrib non-free' >> /etc/apt/sources.list
 RUN apt-get update && \
                        # gcc, make, etc.
     apt-get install -y --no-install-recommends \
@@ -25,6 +31,7 @@ RUN apt-get update && \
 
 RUN pip3 install "ipython[notebook]"
 
+RUN gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/
 RUN gem update --no-document --system && \
     gem install --no-document sciruby-full && \
     iruby register
@@ -38,4 +45,5 @@ EXPOSE 8888
 RUN find . -name '*.ipynb' -exec ipython nbconvert --to notebook {} --output {} \;
 RUN find . -name '*.ipynb' -exec ipython trust {} \;
 
-CMD ipython notebook
+# CMD ipython notebook
+CMD bash -l -c "iruby notebook --no-browser --ip='*' --port 8888 --notebook-dir='/notebooks'"
