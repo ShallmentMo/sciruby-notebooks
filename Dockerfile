@@ -29,6 +29,10 @@ RUN apt-get update && \
     apt-get clean && \
     ln -s /usr/bin/libtoolize /usr/bin/libtool # See https://github.com/zeromq/libzmq/issues/1385
 
+# 更新 gnuplot-nox
+RUN apt-get install -y wget
+RUN cd /home && wget http://jaist.dl.sourceforge.net/project/gnuplot/gnuplot/5.0.3/gnuplot-5.0.3.tar.gz && tar xf gnuplot-5.0.3.tar.gz && cd gnuplot-5.0.3 && ./configure && make && make install
+
 RUN pip3 install "ipython[notebook]"
 
 RUN gem sources --add https://ruby.taobao.org/ --remove https://rubygems.org/
@@ -42,8 +46,8 @@ WORKDIR /notebooks
 EXPOSE 8888
 
 # Convert notebooks to the current format
-RUN find . -name '*.ipynb' -exec ipython nbconvert --to notebook {} --output {} \;
-RUN find . -name '*.ipynb' -exec ipython trust {} \;
+RUN find . -name '*.ipynb' -exec jupyter nbconvert --to notebook {} --output {} \;
+RUN find . -name '*.ipynb' -exec jupyter trust {} \;
 
 # CMD ipython notebook
 CMD bash -l -c "iruby notebook --no-browser --ip='*' --port 8888 --notebook-dir='/notebooks'"
